@@ -1,0 +1,49 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+trigger:
+- features/development
+- master
+
+pool:
+  vmImage: 'windows-latest'
+  name: PrdSys-OnPrem
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: SonarQubePrepare@5
+  inputs:
+    SonarQube: 'SONARQUBE PRODUCTION'
+    scannerMode: 'CLI'
+    configMode: 'manual'
+    cliProjectKey: 'NetAppImprovementSerializationProcessRIC.Americas.GTP'
+    cliSources: '.'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Test'
+  inputs:
+    command: 'test'
+    projects: '**/*[Tt]ests/*.csproj'
+    testRunTitle: 'Test'
+
+- task: SonarQubeAnalyze@5
+  displayName: 'Run Code Analysis'
+
+- task: PublishSymbols@2
+  displayName: 'Publish symbols path'
+  inputs:
+    SearchPattern: '**\bin\**\*.pdb'
+    PublishSymbols: false
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'

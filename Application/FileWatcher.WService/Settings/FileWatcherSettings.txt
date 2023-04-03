@@ -1,0 +1,34 @@
+{
+  "Support": {
+    "DistributionList": [
+      "Guillermo_Leal@jabil.com"
+    ]
+  },
+  "Plugins": [
+    "Cadence.Sftp.dll"
+  ],
+  "Folders": [
+    {
+      "Name": "Prueba",
+      "Event": {
+        "EventType": 0,
+        "ActionType": 3,
+        "Attempts": 3,
+        "DelayInSeconds": 60,
+        "DistributionList": [
+          "joel_castillejos3@jabil.com"
+        ]
+      },
+      "Origin": {
+        "Path": ".\\debug\\watcher",
+        "Filter": "*.txt*"
+      },
+      "Destination": {
+        "Path": ".\\debug\\FileInfo"
+      },
+      "SearchFolder": {
+        "Path": ".\\debug\\TestLog"
+      }
+    }
+  ]
+}

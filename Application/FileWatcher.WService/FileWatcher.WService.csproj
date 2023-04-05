@@ -77,11 +77,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionDb.cs" />
-    <Compile Include="Helpers\GetPartDisk.cs" />
-    <Compile Include="Models\DefaultDbContext.cs" />
-    <Compile Include="Models\LinkbyLinkStation.cs" />
-    <Compile Include="Models\LinkObject.cs" />
-    <Compile Include="Models\SPmodel.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>
     </Compile>

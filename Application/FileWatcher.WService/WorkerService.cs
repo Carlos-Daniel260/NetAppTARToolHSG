@@ -6,19 +6,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.ServiceProcess;
-
-using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 using FileWatcher.Models;
 using FileWatcher.Notification;
 using FileWatcher.Service;
-
-using FileWatcher.WService.Models;
 using FileWatcher.WService.Settings;
 using Humanizer;
 using JabilCore.Utilities.Enumeration;
 using JabilCore.Utilities.Model;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using static JabilCore.Utilities.IO.File;
 
 namespace FileWatcher.WService
@@ -126,11 +121,11 @@ namespace FileWatcher.WService
                     };
 
                     folder.Watcher.Error += WatcherOnError;
+                    folder.Watcher.Created +=OnChanged;
+                }
                     var serviceLocation = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
                     File.AppendAllText(destination + "\\log.txt", $"{Environment.NewLine}[{date}] The service is running in: {serviceLocation} {Environment.NewLine}");
-                    folder.Watcher.Created +=OnChanged;
-                }
             }
             catch (Exception e)
             {
@@ -157,8 +152,25 @@ namespace FileWatcher.WService
             {
                 try
                 {
-                    File.AppendAllText(destination + "\\log.txt", $"changed in {eventArgs.FullPath} {Environment.NewLine}");
-                    return;
+                    var text = ReadTar(eventArgs.FullPath);
+                    if (text == null) return;
+                    if (text?.Count() != 0)
+                    {
+                        string copyFilePath = "C:\\Users\\3601346\\Documents\\PathWatcher\\CopyDestination\\" + eventArgs.Name;
+                        File.Copy(eventArgs.FullPath, copyFilePath, true);
+                        string[] textArray = File.ReadAllLines(copyFilePath);
+                        string serial = textArray[0].Remove(0,1);
+                        var SerialCount = serial.Count();                           
+                        if (SerialCount == 20)
+                        {
+                            textArray[0] = $"S{serial.Substring(0, 7)}";
+                            File.WriteAllLines(copyFilePath, textArray);
+                            
+                        }
+                        File.AppendAllText(destination + "\\log.txt", $"changed in {eventArgs.FullPath} {Environment.NewLine}");
+                        return;
+                     }
+
                 }
                 catch (Exception e)
                 {
@@ -380,6 +392,22 @@ namespace FileWatcher.WService
             {
                 ExecuteAction(folder, file);
             }
+        }
+
+        public static IEnumerable<string> ReadTar(string pathTar)
+        {
+            try
+            {
+                var text = File.ReadLines(pathTar).SkipWhile(p => !p.StartsWith("TP") && !p.EndsWith("TP"));
+                return text;
+
+            }
+            catch (Exception ex)
+            {
+                File.AppendAllText(destination + "\\log.txt", $"{Environment.NewLine}[{date}]Error:  {ex.Message} {Environment.NewLine}");
+                return null;
+            }
+
         }
     }
 }
